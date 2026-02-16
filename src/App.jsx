@@ -1,34 +1,89 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline, Box } from '@mui/material';
+import KrpanoTour from './components/KrpanoTour';
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: '#ffffff',
+      light: '#f5f5f5',
+      dark: '#e0e0e0',
+    },
+    secondary: {
+      main: '#646cff',
+      light: '#8a96ff',
+      dark: '#4054b2',
+    },
+    background: {
+      default: '#000000',
+      paper: '#121212',
+    },
+    text: {
+      primary: '#ffffff',
+      secondary: '#cccccc',
+    },
+    error: {
+      main: '#f44336',
+      light: '#ffcdd2',
+    },
+  },
+  typography: {
+    fontFamily: 'Arial, Helvetica, sans-serif',
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          margin: 0,
+          padding: 0,
+          width: '100vw',
+          height: '100vh',
+          overflow: 'hidden',
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: '16px',
+          color: '#FFFFFF',
+          backgroundColor: '#000000',
+        },
+        '#root': {
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          padding: 0,
+        },
+        html: {
+          width: '100vw',
+          height: '100vh',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+        },
+        '*': {
+          margin: 0,
+          padding: 0,
+          boxSizing: 'border-box',
+        },
+      },
+    },
+  },
+});
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box 
+        sx={{
+          width: '100vw',
+          height: '100vh',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <KrpanoTour />
+      </Box>
+    </ThemeProvider>
   )
 }
 

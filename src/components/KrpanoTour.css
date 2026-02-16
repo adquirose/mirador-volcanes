@@ -1,0 +1,85 @@
+.krpano-container {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #000000;
+  position: relative;
+}
+
+.krpano-viewer {
+  width: 100%;
+  height: 100%;
+  outline: none;
+  border: none;
+}
+
+.krpano-error {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background-color: #000000;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+.krpano-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  background-color: #000000;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  z-index: 1000;
+}
+
+.krpano-loading::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 20px auto 0;
+  border: 3px solid #ffffff;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Asegurar que el tour ocupe toda la pantalla */
+.krpano-container,
+.krpano-viewer,
+.krpano-viewer > * {
+  box-sizing: border-box;
+}
+
+/* Estilos responsivos */
+@media only screen and (min-device-width: 800px) {
+  .krpano-container {
+    overflow: hidden;
+  }
+}
+
+/* Optimización para dispositivos móviles */
+@media screen and (max-width: 768px) {
+  .krpano-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}
