@@ -40,7 +40,8 @@ const Navigation = () => {
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentContent, setCurrentContent] = useState(null);\n  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [currentContent, setCurrentContent] = useState(null);
+  const [logoLoaded, setLogoLoaded] = useState(false);
   const fabRef = useRef(null);
 
   // Estado del formulario de contacto
@@ -372,13 +373,13 @@ const Navigation = () => {
             top: 24,
             left: 24,
             zIndex: theme.zIndex.fab,
-            backgroundColor: alpha(theme.palette.background.default, 0.9),
+            backgroundColor: '#ffffff',
             backdropFilter: 'blur(10px)',
-            color: theme.palette.text.primary,
-            border: `1px solid ${alpha(theme.palette.common.white, 0.2)}`,
+            color: '#000000',
+            border: `1px solid ${alpha('#000000', 0.1)}`,
             boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.3)}`,
             '&:hover': {
-              backgroundColor: alpha(theme.palette.background.default, 0.95),
+              backgroundColor: '#f5f5f5',
               transform: 'scale(1.05)',
             },
             transition: 'all 0.3s ease',
@@ -527,9 +528,9 @@ const Navigation = () => {
           <Paper
             sx={{
               position: 'relative',
-              width: '90%',
-              maxWidth: '800px',
-              maxHeight: '90vh',
+              width: currentContent?.title === 'UBICACIÓN' ? '95%' : '90%',
+              maxWidth: currentContent?.title === 'UBICACIÓN' ? '1100px' : '800px',
+              maxHeight: currentContent?.title === 'UBICACIÓN' ? '95vh' : '90vh',
               backgroundColor: 'rgba(255, 255, 255, 0.98)',
               backdropFilter: 'blur(10px)',
               borderRadius: '16px',
@@ -576,9 +577,12 @@ const Navigation = () => {
             {/* Contenido del modal */}
             <Box
               sx={{
-                p: 4,
-                maxHeight: 'calc(90vh - 120px)',
-                overflow: 'auto',
+                p: currentContent?.title === 'UBICACIÓN' ? 0 : 4,
+                height: currentContent?.title === 'UBICACIÓN' ? 'calc(95vh - 100px)' : 'auto',
+                maxHeight: currentContent?.title === 'UBICACIÓN' ? 'calc(95vh - 100px)' : 'calc(90vh - 120px)',
+                overflow: currentContent?.title === 'UBICACIÓN' ? 'hidden' : 'auto',
+                display: currentContent?.title === 'UBICACIÓN' ? 'flex' : 'block',
+                flexDirection: currentContent?.title === 'UBICACIÓN' ? 'column' : 'initial',
                 '&::-webkit-scrollbar': {
                   width: '8px',
                 },
@@ -595,18 +599,28 @@ const Navigation = () => {
                 },
               }}
             >
-              <Typography
-                variant="body1"
-                sx={{
-                  color: '#444444',
-                  lineHeight: 1.8,
-                  fontSize: '1.1rem',
-                  textAlign: 'justify',
-                  fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
-                }}
-              >
-                {currentContent?.text}
-              </Typography>
+              {/* Solo mostrar mapa para ubicación, sin texto */}
+              {currentContent?.title === 'UBICACIÓN' ? (
+                <MapboxMap 
+                  latitude={-39.651740}
+                  longitude={-72.268545}
+                  zoom={11}
+                  style={{ width: '100%', height: '100%', minHeight: 0 }}
+                />
+              ) : (
+                <Typography
+                  variant="body1"
+                  sx={{
+                    color: '#444444',
+                    lineHeight: 1.8,
+                    fontSize: '1.1rem',
+                    textAlign: 'justify',
+                    fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif',
+                  }}
+                >
+                  {currentContent?.text}
+                </Typography>
+              )}
             </Box>
           </Paper>
         </Slide>
