@@ -17,7 +17,8 @@ import {
   Slide,
   TextField,
   Button,
-  Grid
+  Grid,
+  Skeleton
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
@@ -30,6 +31,7 @@ import {
   ContactMail as ContactIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import MapboxMap from './MapboxMap';
 
 const Navigation = () => {
   const theme = useTheme();
@@ -38,7 +40,7 @@ const Navigation = () => {
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentContent, setCurrentContent] = useState(null);
+  const [currentContent, setCurrentContent] = useState(null);\n  const [logoLoaded, setLogoLoaded] = useState(false);
   const fabRef = useRef(null);
 
   // Estado del formulario de contacto
