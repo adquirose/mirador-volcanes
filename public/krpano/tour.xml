@@ -4,9 +4,7 @@
 	<include url="skin/vistageneral.xml" />
 	<include url="plugins/showtext.xml" />
     <include url="skin/hotspots-actions.xml" />
-    <include url="skin/spots.xml" />
-    <include url="skin/ficha.xml" />
-
+   
     <include url="skin/vtourskin_design_117.xml" />
 
    

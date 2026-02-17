@@ -1,13 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
   CircularProgress, 
   Alert, 
-  Backdrop 
+  Backdrop,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Chip,
+  Grid,
+  Divider,
+  IconButton,
+  Paper
 } from '@mui/material';
+import {
+  Close as CloseIcon,
+  Info as InfoIcon
+} from '@mui/icons-material';
 import { styled, useTheme as useMuiTheme } from '@mui/material/styles';
+import { db } from '../firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import Navigation from './Navigation';
+
+// Variables globales para prevenir múltiples instancias
+let isKrpanoInitializing = false;
+let krpanoInstanceActive = false;
 
 const KrpanoContainer = styled(Box)(({ theme }) => ({
   width: '100vw',
@@ -48,156 +67,300 @@ const LoadingBackdrop = styled(Backdrop)(({ theme }) => ({
 }));
 
 function KrpanoTour() {
-  const panoRef = useRef(null);
-  const scriptLoadedRef = useRef(false);
+  const krpanoRef = useRef(null);
+  const krpanoInitialized = useRef(false);
+  const krpanoId = useRef('krpano-' + Date.now());
+  const [status, setStatus] = useState('Iniciando...');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedLote, setSelectedLote] = useState(null);
+  const [lotes, setLotes] = useState([]);
   const muiTheme = useMuiTheme();
 
-  useEffect(() => {
-    const loadKrpanoScript = () => {
-      return new Promise((resolve, reject) => {
-        // Si el script ya está cargado, resolver inmediatamente
-        if (scriptLoadedRef.current && window.embedpano) {
-          resolve();
-          return;
-        }
-
-        // Crear y cargar el script de krpano
-        const script = document.createElement('script');
-        script.src = '/krpano/tour.js';
-        script.async = true;
-        
-        script.onload = () => {
-          scriptLoadedRef.current = true;
-          resolve();
-        };
-        
-        script.onerror = () => {
-          reject(new Error('Failed to load krpano script'));
-        };
-        
-        document.head.appendChild(script);
-      });
-    };
-
-    const initKrpano = () => {
-      console.log('Initializing krpano...');
-      console.log('panoRef.current:', panoRef.current);
-      console.log('window.embedpano:', window.embedpano);
+  // Cargar lotes desde Firestore
+  const cargarLotes = useCallback(async () => {
+    try {
+      console.log('📦 Cargando lotes desde Firestore...');
+      const lotesRef = collection(db, 'proyectos', 'mirador-volcanes', 'lotes');
+      const snapshot = await getDocs(lotesRef);
+      const lotesData = [];
       
-      if (!panoRef.current) {
-        console.error('No target element found');
-        setError('No target element found');
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.krpano?.scene_master) {
+          lotesData.push({
+            id: doc.id,
+            numero: parseInt(doc.id.replace('lote', '')),
+            firestoreId: doc.id,
+            ...data
+          });
+        }
+      });
+      
+      console.log('✅ Lotes cargados:', lotesData.length);
+      setLotes(lotesData);
+      return lotesData;
+    } catch (error) {
+      console.error('❌ Error cargando lotes:', error);
+      return [];
+    }
+  }, []);
+
+  // Función para recrear spots dinámicos
+  const recreateSpots = useCallback((krpano, lotesData) => {
+    if (!krpano || !lotesData || lotesData.length === 0) {
+      console.log('❌ recreateSpots: Datos faltantes', { krpano: !!krpano, lotesData: lotesData?.length });
+      return;
+    }
+    
+    console.log('🔍 recreateSpots iniciado con', lotesData.length, 'lotes');
+    
+    // Verificar si ya hay spots dinámicos
+    const firstLote = lotesData[0];
+    if (firstLote) {
+      const numero = firstLote.numero;
+      const testSpotName = `spot_${numero}`;
+      
+      // Si el primer spot ya existe, no recrear
+      const exists = krpano.get(`hotspot[${testSpotName}].name`);
+      if (exists) {
+        console.log('✅ Los spots ya existen');
+        setStatus('¡Spots ya presentes!');
         return;
       }
-
-      if (!window.embedpano) {
-        console.error('embedpano function not available');
-        setError('embedpano function not available');
-        return;
+    }
+    
+    console.log('🔄 Creando spots...');
+    setStatus(`Creando ${lotesData.length} spots...`);
+    
+    let created = 0;
+    lotesData.forEach((lote) => {
+      const hs = lote.krpano?.scene_master;
+      if (hs && hs.ath !== undefined && hs.atv !== undefined) {
+        const numero = lote.numero;
+        const estado = (lote.estado || 'disponible').toLowerCase();
+        const spotName = `spot_${numero}`;
+        
+        // Seleccionar estilo según estado
+        let estilo = 'hs_pro_disponible'; // Por defecto disponible
+        if (estado === 'vendido') estilo = 'hs_pro_vendido';
+        else if (estado === 'reservado') estilo = 'hs_pro_reservado';
+        
+        try {
+          console.log(`🎯 Creando spot: ${spotName} con estilo ${estilo} (estado: ${estado}) en (${hs.ath}, ${hs.atv})`);
+          
+          // Crear el hotspot y cargar estilo predefinido
+          krpano.call(`addhotspot(${spotName})`);
+          krpano.call(`set(hotspot[${spotName}].ath, ${hs.ath})`);
+          krpano.call(`set(hotspot[${spotName}].atv, ${hs.atv})`);
+          krpano.call(`hotspot[${spotName}].loadstyle(${estilo})`);
+          krpano.call(`set(hotspot[${spotName}].html, ${numero})`);
+          
+          // Agregar evento onclick
+          krpano.call(`set(hotspot[${spotName}].onclick, js(handleSpotClick('${lote.id}')))`);
+          
+          created++;
+          console.log(`✅ Spot creado: ${spotName}`);
+        } catch (e) {
+          console.error(`❌ Error creando spot ${spotName}:`, e);
+        }
       }
+    });
+    
+    setStatus(`¡${created} spots creados!`);
+    console.log(`🎉 Total spots creados: ${created}`);
+  }, []);
 
+  // Función global para manejar clicks en spots
+  const handleSpotClick = useCallback((loteId) => {
+    console.log('🎯 Click en spot:', loteId);
+    const lote = lotes.find(l => l.id === loteId || l.firestoreId === loteId);
+    if (lote) {
+      console.log('📄 Lote encontrado:', lote);
+      setSelectedLote(lote);
+    } else {
+      console.warn('⚠️ Lote no encontrado:', loteId);
+    }
+  }, [lotes]);
+
+  // Función para cerrar la card
+  const cerrarLote = useCallback(() => {
+    setSelectedLote(null);
+  }, []);
+
+  // Determinar color del estado
+  const getEstadoColor = useCallback((estado) => {
+    switch(estado?.toLowerCase()) {
+      case 'disponible': return 'success';
+      case 'vendido': return 'error';  
+      case 'reservado': return 'warning';
+      default: return 'default';
+    }
+  }, []);
+
+  // Configurar función global para manejo de clicks
+  useEffect(() => {
+    console.log('🔧 Configurando handleSpotClick, lotes disponibles:', lotes.length);
+    
+    window.handleSpotClick = handleSpotClick;
+    window.getLotes = () => lotes;
+
+    return () => {
+      delete window.handleSpotClick;
+      delete window.getLotes;
+    };
+  }, [handleSpotClick, lotes]);
+
+  // Cargar lotes al montar
+  useEffect(() => {
+    cargarLotes();
+  }, [cargarLotes]);
+
+  // Crear spots cuando lleguen los lotes
+  useEffect(() => {
+    if (window.krpano && lotes.length > 0) {
+      console.log('✨ Lotes cargados, creando spots...');
+      setTimeout(() => {
+        recreateSpots(window.krpano, lotes);
+      }, 100);
+    }
+  }, [lotes, recreateSpots]);
+
+  // Función para inicializar Krpano
+  const initializeKrpano = useCallback(() => {
+    if (window.isKrpanoInitializing || window.krpanoInstanceActive) {
+      console.log('⚠️ Krpano ya está inicializándose o activo');
+      return;
+    }
+    
+    if (window.embedpano) {
+      window.isKrpanoInitializing = true;
+      setIsLoading(true);
+      setStatus('Cargando panorama...');
+      
       try {
-        // Configuración del tour krpano usando el ID del elemento
+        console.log('🚀 Iniciando Krpano...');
+        
         window.embedpano({
-          swf: "/krpano/tour.swf",
-          xml: "/krpano/tour.xml", 
-          target: "krpano-viewer", // Usar el ID en lugar del ref
-          html5: "prefer",
-          passQueryParameters: true,
+          xml: '/krpano/tour.xml',
+          target: krpanoId.current,
+          html5: 'only',
+          passQueryParameters: false,
           mobilescale: 1.0,
-          onready: (krpano) => {
-            console.log('Krpano tour loaded successfully', krpano);
+          consolelog: false,
+          onready: function(krpano_interface) {
+            console.log('✅ Krpano listo');
+            
+            window.krpano = krpano_interface;
+            window.krpanoInstanceActive = true;
+            window.isKrpanoInitializing = false;
+            krpanoRef.current = krpano_interface;
+            
             setIsLoading(false);
+            setError(null);
+            setStatus('¡Panorama cargado! Preparando spots...');
+            
+            // Crear spots si ya tenemos los datos
+            setTimeout(() => {
+              if (lotes && lotes.length > 0) {
+                console.log('🎯 Creando spots con datos ya disponibles...');
+                recreateSpots(krpano_interface, lotes);
+              } else {
+                console.log('⏳ Esperando datos de lotes...');
+                setStatus('Esperando datos de lotes...');
+              }
+            }, 1000);
           },
-          onerror: (errorMsg) => {
-            console.error('Krpano error:', errorMsg);
-            setError(errorMsg);
+          onerror: function(error) {
+            console.error('❌ Error en Krpano:', error);
+            window.isKrpanoInitializing = false;
+            setError(error);
             setIsLoading(false);
+            setStatus('Error cargando el panorama');
           }
         });
-      } catch (err) {
-        console.error('Error during embedpano call:', err);
-        setError(err.message);
-        setIsLoading(false);
-      }
-    };
-
-    const setupTour = async () => {
-      try {
-        await loadKrpanoScript();
-        // Asegurar que el DOM esté completamente listo
-        // Usar requestAnimationFrame para mejor timing del DOM
-        const setupWithRAF = () => {
-          requestAnimationFrame(() => {
-            if (panoRef.current) {
-              initKrpano();
-            } else {
-              // Intentar una vez más después de un breve delay
-              setTimeout(() => {
-                if (panoRef.current) {
-                  initKrpano();
-                } else {
-                  console.error('Target element not ready after timeout');
-                  setError('Target element not ready');
-                }
-              }, 100);
-            }
-          });
-        };
         
-        setupWithRAF();
-      } catch (error) {
-        console.error('Error loading krpano:', error);
+      } catch (error) { 
+        console.error('❌ Error inicializando Krpano:', error);
+        window.isKrpanoInitializing = false;
         setError(error.message);
         setIsLoading(false);
       }
-    };
+    } else {
+      console.log('⏳ embedpano no disponible aún');
+      setTimeout(initializeKrpano, 500);
+    }
+  }, [lotes, recreateSpots]);
 
-    setupTour();
+  // Variables ref para el script
+  const scriptLoadedRef = useRef(false);
 
-    // Cleanup function
+  // Verificar e inicializar cuando se monte el componente
+  useEffect(() => {
+    if (window.krpanoInstanceActive) {
+      console.log('♻️ Krpano ya está activo');
+      setIsLoading(false);
+      setStatus('Panorama ya cargado');
+      return;
+    }
+    
+    // Cargar script de Krpano si no está cargado
+    if (!scriptLoadedRef.current && !window.embedpano) {
+      console.log('📂 Cargando script de Krpano...');
+      const script = document.createElement('script');
+      script.src = '/krpano/tour.js';
+      script.async = true;
+      
+      script.onload = () => {
+        console.log('✅ Script de Krpano cargado');
+        scriptLoadedRef.current = true;
+        setTimeout(initializeKrpano, 100);
+      };
+      
+      script.onerror = () => {
+        console.error('❌ Error cargando script de Krpano');
+        setError('Error cargando tour.js');
+        setIsLoading(false);
+      };
+      
+      document.head.appendChild(script);
+      
+      return () => {
+        if (document.head.contains(script)) {
+          document.head.removeChild(script);
+        }
+      };
+    } else {
+      // Script ya está cargado
+      setTimeout(initializeKrpano, 100);
+    }
+  }, [initializeKrpano]);
+
+  // Cleanup al desmontar
+  useEffect(() => {
     return () => {
-      if (window.removepano) {
-        window.removepano("krpano-viewer");
+      if (window.krpano && window.krpanoInstanceActive) {
+        try {
+          console.log('🧹 Limpiando instancia de Krpano...');
+          window.krpano.call('unloadtour()');
+          delete window.krpano;
+          window.krpanoInstanceActive = false;
+          window.isKrpanoInitializing = false;
+        } catch (e) {
+          console.error('Error en cleanup:', e);
+        }
       }
     };
   }, []);
 
-  if (error) {
-    return (
-      <KrpanoContainer>
-        <Navigation />
-        <ErrorContainer>
-          <Alert 
-            severity="error" 
-            sx={{ 
-              backgroundColor: 'rgba(255, 0, 0, 0.1)',
-              color: muiTheme.palette.text.primary,
-              border: `1px solid rgba(255, 0, 0, 0.3)`,
-              '& .MuiAlert-icon': {
-                color: muiTheme.palette.text.primary
-              }
-            }}
-          >
-            <Typography variant="h6" component="div" sx={{ mb: 1 }}>
-              ERROR
-            </Typography>
-            <Typography variant="body1">
-              {error}
-            </Typography>
-          </Alert>
-        </ErrorContainer>
-      </KrpanoContainer>
-    );
-  }
-
+  // Renderizar
   return (
     <KrpanoContainer>
+      <Navigation />
+      
+      {/* Contenedor del panorama */}
       <KrpanoViewer 
-        ref={panoRef}
-        id="krpano-viewer"
+        id={krpanoId.current}
         sx={{ 
           display: isLoading ? 'none' : 'block',
           '@media only screen and (min-device-width: 800px)': {
@@ -221,25 +384,172 @@ function KrpanoTour() {
         </noscript>
       </KrpanoViewer>
       
-      <Navigation />
-      
+      {/* Loading Backdrop */}
       <LoadingBackdrop open={isLoading}>
         <CircularProgress 
-          color="inherit" 
-          size={60}
-          sx={{ mb: 2 }}
+          size={60} 
+          sx={{ 
+            color: muiTheme.palette.primary.main,
+            mb: 2
+          }} 
         />
         <Typography 
           variant="h6" 
-          component="div"
           sx={{ 
-            color: 'inherit',
-            fontFamily: muiTheme.typography.fontFamily
+            color: muiTheme.palette.text.primary,
+            textAlign: 'center'
           }}
         >
-          Cargando tour virtual...
+          {status}
         </Typography>
       </LoadingBackdrop>
+
+      {/* Error Display */}
+      {error && (
+        <ErrorContainer>
+          <Alert 
+            severity="error" 
+            sx={{ 
+              backgroundColor: 'rgba(255, 0, 0, 0.1)',
+              color: muiTheme.palette.text.primary,
+              border: `1px solid rgba(255, 0, 0, 0.3)`,
+              '& .MuiAlert-icon': {
+                color: muiTheme.palette.text.primary
+              }
+            }}
+          >
+            <Typography variant="h6" component="div" sx={{ mb: 1 }}>
+              ERROR
+            </Typography>
+            <Typography variant="body1">
+              {error}
+            </Typography>
+          </Alert>
+        </ErrorContainer>
+      )}
+
+      {/* Card para mostrar información del lote */}
+      {selectedLote && (
+        <Paper
+          elevation={24}
+          sx={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 9999,
+            maxWidth: '600px',
+            width: '90%',
+            borderRadius: 4,
+            backgroundColor: '#ffffff',
+            border: '2px solid #e0e7ff',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+          }}
+        >
+          {/* Header */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            p: 3,
+            borderBottom: '1px solid #e0e0e0'
+          }}>
+              <Typography variant="h5" component="h2" sx={{ 
+                fontWeight: 600,
+                color: '#212121'
+              }}>
+                {selectedLote.nombre}
+              </Typography>
+              <IconButton 
+                onClick={cerrarLote}
+                sx={{ 
+                  color: '#212121',
+                  '&:hover': {
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+                size="small"
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+
+            <CardContent sx={{ p: 3 }}>
+              {/* Estado */}
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <InfoIcon color="action" />
+                <Typography variant="body2" sx={{ color: '#424242' }}>
+                  Estado:
+                </Typography>
+                <Chip 
+                  label={selectedLote.estado?.toUpperCase() || 'SIN ESTADO'}
+                  color={getEstadoColor(selectedLote.estado)}
+                  size="small"
+                />
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Superficies */}
+              <Grid container spacing={2}>
+                <Grid size={6}>
+                  <Paper 
+                    elevation={6}
+                    sx={{ 
+                      p: 2.5,
+                      backgroundColor: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: 2,
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: '#64748b', mb: 1, fontWeight: 500 }}>
+                      Superficie Total
+                    </Typography>
+                    <Typography variant="h6" fontWeight="700" sx={{ color: '#1e293b' }}>
+                      {selectedLote.superficie} m²
+                    </Typography>
+                  </Paper>
+                </Grid>
+
+                <Grid size={6}>
+                  <Paper 
+                    elevation={6}
+                    sx={{ 
+                      p: 2.5,
+                      backgroundColor: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: 2,
+                      textAlign: 'center',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: '#64748b', mb: 1, fontWeight: 500 }}>
+                      Superficie Útil
+                    </Typography>
+                    <Typography variant="h6" fontWeight="700" sx={{ color: '#1e293b' }}>
+                      {selectedLote.superficieUtil} m²
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </CardContent>
+
+            {/* Botón cerrar */}
+            <CardActions sx={{ p: 3, pt: 2, justifyContent: 'center' }}>
+              <Button 
+                onClick={cerrarLote}
+                variant="outlined" 
+                color="primary" 
+                size="medium"
+              >
+                Cerrar
+              </Button>
+            </CardActions>
+        </Paper>
+      )}
     </KrpanoContainer>
   );
 }

@@ -178,6 +178,7 @@ export const lightTheme = createTheme({
       main: '#1976d2',
       light: '#42a5f5',
       dark: '#1565c0',
+      contrastText: '#ffffff',
     },
     secondary: {
       main: '#dc004e',
@@ -190,6 +191,18 @@ export const lightTheme = createTheme({
       primary: '#000000',
       secondary: '#666666',
     },
+    error: {
+      main: '#f44336',
+    },
+    warning: {
+      main: '#ff9800',
+    },
+    info: {
+      main: '#2196f3',
+    },
+    success: {
+      main: '#4caf50',
+    },
   },
   typography: {
     fontFamily: 'Arial, Helvetica, sans-serif',
@@ -201,9 +214,144 @@ export const lightTheme = createTheme({
           backgroundColor: '#ffffff',
           color: '#000000',
         },
+        html: {
+          backgroundColor: '#ffffff',
+        },
+        '#root': {
+          backgroundColor: '#ffffff',
+        },
+      },
+    },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        },
+      },
+    },
+    MuiCircularProgress: {
+      defaultProps: {
+        thickness: 4,
+      },
+      styleOverrides: {
+        root: {
+          color: '#1976d2',
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+        },
+      },
+    },
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          borderBottom: '1px solid #e0e0e0',
+        },
+        head: {
+          backgroundColor: '#f5f5f5',
+          color: '#000000',
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+        },
+      },
+    },
+    MuiCardContent: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            backgroundColor: '#ffffff',
+            color: '#000000',
+          },
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: '#ffffff',
+            '& fieldset': {
+              borderColor: '#e0e0e0',
+            },
+            '&:hover fieldset': {
+              borderColor: '#1976d2',
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#1976d2',
+            },
+          },
+          '& .MuiInputLabel-root': {
+            color: '#666666',
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
+          color: '#000000',
+          '&:hover': {
+            backgroundColor: '#f5f5f5',
+          },
+          '&.Mui-selected': {
+            backgroundColor: '#e3f2fd',
+            '&:hover': {
+              backgroundColor: '#bbdefb',
+            },
+          },
+        },
+      },
+    },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputLabel-root': {
+            color: '#666666',
+          },
+        },
+      },
+    },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#f5f5f5',
+          color: '#000000',
+        },
       },
     },
   },
 });
 
-export default darkTheme;
+export default lightTheme;

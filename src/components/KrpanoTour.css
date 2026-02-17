@@ -4,7 +4,7 @@
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background-color: #000000;
+  background-color: #ffffff;
   position: relative;
 }
 
@@ -21,8 +21,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  background-color: #000000;
+  color: #000000;
+  background-color: #ffffff;
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
@@ -37,8 +37,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  background-color: #000000;
+  color: #000000;
+  background-color: #ffffff;
   text-align: center;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 18px;
@@ -51,7 +51,7 @@
   width: 40px;
   height: 40px;
   margin: 20px auto 0;
-  border: 3px solid #ffffff;
+  border: 3px solid #000000;
   border-top-color: transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;

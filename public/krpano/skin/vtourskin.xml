@@ -8,7 +8,7 @@
 	               maps_bing_api_key=""
 	               maps_google_api_key=""
 	               maps_zoombuttons="false"
-	               gyro="true"
+	               gyro="false"
 	               webvr="false"
 	               webvr_gyro_keeplookingdirection="false"
 	               webvr_prev_next_hotspots="true"
@@ -95,7 +95,7 @@
 
 
 	<!-- include VR support - http://krpano.com/plugins/webvr/ -->
-	<include url="%SWFPATH%/plugins/webvr.xml" devices="html5" />
+	<include url="%VIEWER%/plugins/webvr.xml" devices="html5" />
 
 	<!-- overwrite some settings from the webvr.xml for the skin integration -->
 	<plugin name="WebVR" keep="true" devices="html5"

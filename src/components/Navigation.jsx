@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Fab,
   Drawer,
@@ -28,13 +29,17 @@ import {
   Description as ProjectIcon,
   PhotoLibrary as GalleryIcon,
   LocationOn as LocationIcon,
-  ContactMail as ContactIcon
+  ContactMail as ContactIcon,
+  AdminPanelSettings as AdminIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
+import { useAuth } from '../hooks/useAuth';
 import MapboxMap from './MapboxMap';
 
 const Navigation = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
@@ -137,7 +142,8 @@ const Navigation = () => {
     { label: 'PROYECTO', id: 'proyecto', icon: <ProjectIcon /> },
     { label: 'GALERIA', id: 'galeria', icon: <GalleryIcon /> },
     { label: 'UBICACION', id: 'ubicacion', icon: <LocationIcon /> }, 
-    { label: 'CONTACTO', id: 'contacto', icon: <ContactIcon /> }
+    { label: 'CONTACTO', id: 'contacto', icon: <ContactIcon /> },
+    ...(isAuthenticated ? [{ label: 'ADMIN', id: 'admin', icon: <AdminIcon /> }] : [])
   ];
 
   const content = {
@@ -165,6 +171,12 @@ const Navigation = () => {
 
   const handleNavClick = (itemId) => {
     console.log(`Navegando a: ${itemId}`);
+    
+    if (itemId === 'admin') {
+      navigate('/admin');
+      setDrawerOpen(false);
+      return;
+    }
     
     if (itemId === 'galeria') {
       setGalleryModalOpen(true);

@@ -5,8 +5,8 @@ import { darkTheme, lightTheme } from './themes';
 import { ThemeContext } from './ThemeContext';
 
 export const ThemeProvider = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-  const [currentTheme, setCurrentTheme] = useState(darkTheme);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState(lightTheme);
 
   const toggleTheme = useCallback(() => {
     const newMode = !isDarkMode;

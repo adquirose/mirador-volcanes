@@ -1,6 +1,9 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Box } from '@mui/material';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
 import KrpanoTour from './components/KrpanoTour';
+import AdminApp from './components/AdminApp';
 
 const theme = createTheme({
   palette: {
@@ -70,20 +73,33 @@ const theme = createTheme({
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box 
-        sx={{
-          width: '100vw',
-          height: '100vh',
-          margin: 0,
-          padding: 0,
-          overflow: 'hidden',
-        }}
-      >
-        <KrpanoTour />
-      </Box>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <Box 
+            sx={{
+              width: '100vw',
+              height: '100vh',
+              margin: 0,
+              padding: 0,
+              overflow: 'hidden',
+            }}
+          >
+            <Routes>
+              {/* Ruta principal - Tour Virtual */}
+              <Route path="/" element={<KrpanoTour />} />
+              
+              {/* Ruta de administración */}
+              <Route path="/admin" element={<AdminApp />} />
+              
+              {/* Ruta por defecto */}
+              <Route path="*" element={<KrpanoTour />} />
+            </Routes>
+          </Box>
+        </Router>
+      </ThemeProvider>
+    </AuthProvider>
   )
 }
 
