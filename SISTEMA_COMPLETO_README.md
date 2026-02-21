@@ -1,8 +1,8 @@
-# Sistema Completo - Mirador Volcanes con Panel de Administración
+# Sistema Completo - Lote Volcanes con Panel de Administración
 
 ## 📋 Resumen del Sistema
 
-Se ha implementado exitosamente un sistema completo para **Mirador Volcanes** que incluye:
+Se ha implementado exitosamente un sistema completo para **Lote Volcanes** que incluye:
 
 - ✅ Tour panorámico interactivo con Krpano
 - ✅ Integración dinámica con Firebase Firestore  
@@ -194,4 +194,4 @@ El proyecto está **listo para uso** en desarrollo y puede ser **deployado a pro
 
 ---
 
-**Desarrollado para Mirador Volcanes - Proyecto Inmobiliario Exclusivo**
+**Desarrollado para Lote Volcanes - Proyecto Inmobiliario Exclusivo**

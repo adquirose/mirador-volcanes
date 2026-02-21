@@ -1,4 +1,4 @@
-// Configuración de Firebase para Mirador Volcanes
+// Configuración de Firebase para Lote Los Volcanes
 import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';

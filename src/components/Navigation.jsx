@@ -19,7 +19,8 @@ import {
   TextField,
   Button,
   Grid,
-  Skeleton
+  Skeleton,
+  useMediaQuery
 } from '@mui/material';
 import { 
   Menu as MenuIcon, 
@@ -30,17 +31,19 @@ import {
   PhotoLibrary as GalleryIcon,
   LocationOn as LocationIcon,
   ContactMail as ContactIcon,
-  AdminPanelSettings as AdminIcon
+  AdminPanelSettings as AdminIcon,
+  WhatsApp as WhatsAppIcon
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../hooks/useAuth';
 import MapboxMap from './MapboxMap';
 
-const Navigation = () => {
+const Navigation = ({ onDrawerChange }) => {
   const theme = useTheme();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const [drawerOpen, setDrawerOpen] = useState(isDesktop);
   const [modalOpen, setModalOpen] = useState(false);
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -54,7 +57,7 @@ const Navigation = () => {
     nombre: '',
     telefono: '',
     email: '',
-    rut: ''
+    asunto: ''
   });
 
   // Estado para errores de validación
@@ -62,53 +65,57 @@ const Navigation = () => {
     nombre: '',
     telefono: '',
     email: '',
-    rut: ''
+    asunto: ''
   });
 
+  // Comunicar cambios en el estado del drawer
+  useEffect(() => {
+    if (onDrawerChange) {
+      onDrawerChange(drawerOpen);
+    }
+  }, [drawerOpen, onDrawerChange]);
+
+  // Manejar aria-hidden para el root cuando hay modales abiertos
+  useEffect(() => {
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      if (modalOpen || galleryModalOpen || contactModalOpen) {
+        rootElement.setAttribute('aria-hidden', 'true');
+      } else {
+        rootElement.removeAttribute('aria-hidden');
+      }
+    }
+    
+    // Cleanup
+    return () => {
+      if (rootElement) {
+        rootElement.removeAttribute('aria-hidden');
+      }
+    };
+  }, [modalOpen, galleryModalOpen, contactModalOpen]);
+
+  // Cerrar drawer cuando se abre modal de contacto
+  useEffect(() => {
+    if (contactModalOpen && drawerOpen) {
+      setDrawerOpen(false);
+    }
+  }, [contactModalOpen, drawerOpen]);
+
+  // Cerrar drawer cuando se abre modal de galería
+  useEffect(() => {
+    if (galleryModalOpen && drawerOpen) {
+      setDrawerOpen(false);
+    }
+  }, [galleryModalOpen, drawerOpen]);
+
+  // Cerrar drawer cuando se abre modal principal
+  useEffect(() => {
+    if (modalOpen && drawerOpen) {
+      setDrawerOpen(false);
+    }
+  }, [modalOpen, drawerOpen]);
+
   // Funciones de validación
-  const validateRut = (rut) => {
-    if (!rut.trim()) return '';
-    
-    const cleanRut = rut.replace(/[^0-9kK]/g, '').toUpperCase();
-    
-    // No mostrar error si aún está incompleto (menos de 7 caracteres)
-    if (cleanRut.length < 7) return '';
-    
-    if (cleanRut.length < 8 || cleanRut.length > 9) {
-      return 'RUT debe tener entre 8 y 9 dígitos';
-    }
-
-    const rutNumber = cleanRut.slice(0, -1);
-    const verifierDigit = cleanRut.slice(-1);
-    
-    // Validar que la parte númerica sea válida
-    if (!/^[0-9]+$/.test(rutNumber)) {
-      return 'RUT debe contener solo números';
-    }
-    
-    let sum = 0;
-    let multiplier = 2;
-    
-    // Algoritmo del módulo 11 para RUT chileno
-    for (let i = rutNumber.length - 1; i >= 0; i--) {
-      sum += parseInt(rutNumber[i]) * multiplier;
-      multiplier = multiplier === 7 ? 2 : multiplier + 1;
-    }
-    
-    const remainder = 11 - (sum % 11);
-    let calculatedVerifier;
-    
-    if (remainder === 11) {
-      calculatedVerifier = '0';
-    } else if (remainder === 10) {
-      calculatedVerifier = 'K';
-    } else {
-      calculatedVerifier = remainder.toString();
-    }
-    
-    return verifierDigit === calculatedVerifier ? '' : 'RUT inválido';
-  };
-
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) ? '' : 'Email inválido';
@@ -122,14 +129,14 @@ const Navigation = () => {
 
   const validateField = (field, value) => {
     switch (field) {
-      case 'rut':
-        return validateRut(value);
       case 'email':
         return validateEmail(value);
       case 'telefono':
         return validatePhone(value);
       case 'nombre':
         return value.trim().length < 2 ? 'Nombre debe tener al menos 2 caracteres' : '';
+      case 'asunto':
+        return value.trim().length < 3 ? 'Asunto debe tener al menos 3 caracteres' : '';
       default:
         return '';
     }
@@ -143,25 +150,26 @@ const Navigation = () => {
     { label: 'GALERIA', id: 'galeria', icon: <GalleryIcon /> },
     { label: 'UBICACION', id: 'ubicacion', icon: <LocationIcon /> }, 
     { label: 'CONTACTO', id: 'contacto', icon: <ContactIcon /> },
+    { label: 'WHATSAPP', id: 'whatsapp', icon: <WhatsAppIcon /> },
     ...(isAuthenticated ? [{ label: 'ADMIN', id: 'admin', icon: <AdminIcon /> }] : [])
   ];
 
   const content = {
     proyecto: {
       title: 'PROYECTO',
-      text: 'Ubicado en uno de los sectores más atractivos de Panguipulli, Mirador Los Volcanes es un loteo exclusivo de sólo 10 sitios de ~5.000 m², con vistas privilegiadas a los volcanes Villarrica y Choshuenco. La primera línea de sitios se integra a bosque nativo y borde de lago, mientras que la segunda línea se encuentra en una pradera de suave pendiente con inigualables vistas panorámicas. El entorno es ideal para quienes buscan un espacio de tranquilidad y privacidad junto al lago, a sólo 10 minutos del pueblo. El loteo contempla urbanización soterrada y un amplio sector de playa común con 80 mt de frente de lago, muelle, bajada pavimentada, bajada de lancha, estacionamientos y bodegas para equipos náuticos. Mirador Los Volcanes ofrece una excelente conectividad por camino Etchegaray, ruta de muy bajo tránsito, con acceso por camino privado y portón exclusivo que refuerzan un entorno seguro, silencioso y verdaderamente único para vivir o descansar junto al lago.'
+      text: 'Ubicado en uno de los sectores más atractivos de Panguipulli, Lote Los Volcanes es un loteo exclusivo de sólo 10 sitios de ~5.000 m², con vistas privilegiadas a los volcanes Villarrica y Choshuenco. La primera línea de sitios se integra a bosque nativo y borde de lago, mientras que la segunda línea se encuentra en una pradera de suave pendiente con inigualables vistas panorámicas. El entorno es ideal para quienes buscan un espacio de tranquilidad y privacidad junto al lago, a sólo 10 minutos del pueblo. El loteo contempla urbanización soterrada y un amplio sector de playa común con 80 mt de frente de lago, muelle, bajada pavimentada, bajada de lancha, estacionamientos y bodegas para equipos náuticos. Lote Los Volcanes ofrece una excelente conectividad por camino Etchegaray, ruta de muy bajo tránsito, con acceso por camino privado y portón exclusivo que refuerzan un entorno seguro, silencioso y verdaderamente único para vivir o descansar junto al lago.'
     },
     galeria: {
       title: 'GALERÍA',
-      text: 'Galería de imágenes del proyecto Mirador Los Volcanes. Aquí podrás ver fotografías de los sitios, las vistas panorámicas, el entorno natural y las instalaciones comunes del loteo.'
+      text: 'Galería de imágenes del proyecto Lote Los Volcanes. Aquí podrás ver fotografías de los sitios, las vistas panorámicas, el entorno natural y las instalaciones comunes del loteo.'
     },
     ubicacion: {
       title: 'UBICACIÓN',
-      text: 'Mirador Los Volcanes se encuentra estratégicamente ubicado en Panguipulli, Región de Los Ríos, Chile. Con fácil acceso por camino Etchegaray y a solo 10 minutos del centro del pueblo, ofrece la perfecta combinación entre tranquilidad y conectividad.'
+      text: 'Lote Los Volcanes se encuentra estratégicamente ubicado en Panguipulli, Región de Los Ríos, Chile. Con fácil acceso por camino Etchegaray y a solo 10 minutos del centro del pueblo, ofrece la perfecta combinación entre tranquilidad y conectividad.'
     },
     contacto: {
       title: 'CONTACTO',
-      text: 'Para más información sobre Mirador Los Volcanes, no dudes en contactarnos. Nuestro equipo está disponible para resolver todas tus consultas sobre este exclusivo proyecto inmobiliario.'
+      text: 'Para más información sobre Lote Los Volcanes, no dudes en contactarnos. Nuestro equipo está disponible para resolver todas tus consultas sobre este exclusivo proyecto inmobiliario.'
     }
   };
 
@@ -178,17 +186,38 @@ const Navigation = () => {
       return;
     }
     
-    if (itemId === 'galeria') {
-      setGalleryModalOpen(true);
-      setCurrentImageIndex(0);
-    } else if (itemId === 'contacto') {
-      setContactModalOpen(true);
-    } else {
-      setCurrentContent(content[itemId]);
-      setModalOpen(true);
+    if (itemId === 'whatsapp') {
+      const message = encodeURIComponent('Hola, me interesa conocer más sobre Lote Los Volcanes');
+      const whatsappUrl = `https://wa.me/56982521849?text=${message}`;
+      window.open(whatsappUrl, '_blank');
+      setDrawerOpen(false);
+      return;
     }
     
-    setDrawerOpen(false);
+    if (itemId === 'galeria') {
+      // Cerrar drawer antes de abrir modal
+      setDrawerOpen(false);
+      // Usar setTimeout para asegurar que el drawer se cierre completamente
+      setTimeout(() => {
+        setGalleryModalOpen(true);
+        setCurrentImageIndex(0);
+      }, 150);
+    } else if (itemId === 'contacto') {
+      // Cerrar drawer antes de abrir modal
+      setDrawerOpen(false);
+      // Usar setTimeout para asegurar que el drawer se cierre completamente
+      setTimeout(() => {
+        setContactModalOpen(true);
+      }, 150);
+    } else {
+      // Cerrar drawer antes de abrir modal
+      setDrawerOpen(false);
+      // Usar setTimeout para asegurar que el drawer se cierre completamente
+      setTimeout(() => {
+        setCurrentContent(content[itemId]);
+        setModalOpen(true);
+      }, 150);
+    }
   };
 
   const handleCloseModal = () => {
@@ -207,13 +236,13 @@ const Navigation = () => {
       nombre: '',
       telefono: '',
       email: '',
-      rut: ''
+      asunto: ''
     });
     setFormErrors({
       nombre: '',
       telefono: '',
       email: '',
-      rut: ''
+      asunto: ''
     });
   };
 
@@ -382,7 +411,7 @@ const Navigation = () => {
           onClick={handleToggleDrawer}
           sx={{
             position: 'fixed',
-            top: 24,
+            top: 30,
             left: 24,
             zIndex: theme.zIndex.fab,
             backgroundColor: '#ffffff',
@@ -408,6 +437,8 @@ const Navigation = () => {
         anchor="left"
         open={drawerOpen}
         onClose={handleToggleDrawer}
+        keepMounted={false}
+        variant={isDesktop ? "persistent" : "temporary"}
         sx={{
           '& .MuiDrawer-paper': {
             width: 320,
@@ -417,6 +448,17 @@ const Navigation = () => {
             borderRight: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
             boxShadow: `8px 0 32px ${alpha(theme.palette.common.black, 0.2)}`,
           },
+        }}
+        ModalProps={{
+          disableEnforceFocus: true,
+          disableAutoFocus: true,
+          disableRestoreFocus: true,
+          hideBackdrop: isDesktop,
+          BackdropProps: {
+            sx: {
+              backgroundColor: 'rgba(0, 0, 0, 0.2)', // Menos opacidad que el default (0.5)
+            }
+          }
         }}
         SlideProps={{
           direction: 'right',
@@ -440,15 +482,29 @@ const Navigation = () => {
               alignItems: 'center',
             }}
           >
+            {!logoLoaded && (
+              <Skeleton 
+                variant="rectangular" 
+                width={224} 
+                height={96}
+                sx={{
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  borderRadius: 1
+                }}
+              />
+            )}
             <img
-              src="/logorivera.png"
+              src="/loteo-v4.png"
               alt="Logo Rivera"
               style={{
-                maxWidth: '280px',
-                maxHeight: '120px',
+                maxWidth: '224px',
+                maxHeight: '96px',
                 width: '100%',
                 objectFit: 'contain',
+                display: logoLoaded ? 'block' : 'none'
               }}
+              onLoad={() => setLogoLoaded(true)}
+              onError={() => setLogoLoaded(false)}
             />
           </Box>
 
@@ -526,14 +582,19 @@ const Navigation = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         closeAfterTransition
-        disableEnforceFocus
-        disableAutoFocus
-        disableRestoreFocus
+        disableEnforceFocus={false}
+        disableAutoFocus={false}
+        disableRestoreFocus={false}
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 2000,
+        }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }
         }}
       >
         <Slide direction="up" in={modalOpen} mountOnEnter unmountOnExit>
@@ -643,14 +704,19 @@ const Navigation = () => {
         open={galleryModalOpen}
         onClose={handleCloseGallery}
         closeAfterTransition
-        disableEnforceFocus
-        disableAutoFocus
-        disableRestoreFocus
+        disableEnforceFocus={false}
+        disableAutoFocus={false}
+        disableRestoreFocus={false}
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 2000,
+        }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }
         }}
       >
         <Slide direction="up" in={galleryModalOpen} mountOnEnter unmountOnExit>
@@ -845,14 +911,19 @@ const Navigation = () => {
         open={contactModalOpen}
         onClose={handleCloseContact}
         closeAfterTransition
-        disableEnforceFocus
-        disableAutoFocus
-        disableRestoreFocus
+        disableEnforceFocus={false}
+        disableAutoFocus={false}
+        disableRestoreFocus={false}
         sx={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 2000,
+        }}
+        BackdropProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }
         }}
       >
         <Slide direction="up" in={contactModalOpen} mountOnEnter unmountOnExit>
@@ -925,7 +996,7 @@ const Navigation = () => {
                   fontSize: { xs: '0.9rem', sm: '1rem' },
                 }}
               >
-                Nos interesa conocer tu opinión sobre Mirador Los Volcanes. 
+                Nos interesa conocer tu opinión sobre Lote Los Volcanes. 
                 Completa el formulario y nos contactaremos contigo.
               </Typography>
 
@@ -991,18 +1062,18 @@ const Navigation = () => {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={12}>
                   <TextField
                     fullWidth
-                    label="RUT"
+                    label="Email"
                     variant="outlined"
                     required
-                    value={contactForm.rut}
-                    onChange={handleContactFormChange('rut')}
-                    onBlur={handleFieldBlur('rut')}
-                    placeholder="12.345.678-9"
-                    error={!!formErrors.rut}
-                    helperText={formErrors.rut || 'Formato: XX.XXX.XXX-X'}
+                    type="email"
+                    value={contactForm.email}
+                    onChange={handleContactFormChange('email')}
+                    placeholder="tucorreo@ejemplo.com"
+                    error={!!formErrors.email}
+                    helperText={formErrors.email}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '12px',
@@ -1054,7 +1125,7 @@ const Navigation = () => {
                   />
                 </Grid>
 
-                <Grid size={{ xs: 12, sm: 6 }}>
+                <Grid size={12}>
                   <TextField
                     fullWidth
                     label="Teléfono"
@@ -1120,15 +1191,14 @@ const Navigation = () => {
                 <Grid size={12}>
                   <TextField
                     fullWidth
-                    label="Email"
+                    label="Asunto"
                     variant="outlined"
                     required
-                    type="email"
-                    value={contactForm.email}
-                    onChange={handleContactFormChange('email')}
-                    placeholder="tucorreo@ejemplo.com"
-                    error={!!formErrors.email}
-                    helperText={formErrors.email}
+                    value={contactForm.asunto}
+                    onChange={handleContactFormChange('asunto')}
+                    placeholder="Consulta sobre el proyecto"
+                    error={!!formErrors.asunto}
+                    helperText={formErrors.asunto}
                     sx={{
                       '& .MuiOutlinedInput-root': {
                         borderRadius: '12px',

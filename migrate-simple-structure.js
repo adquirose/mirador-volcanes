@@ -228,7 +228,7 @@ async function migrateToFirestoreSimple() {
     const proyectoRef = doc(db, 'proyectos', 'mirador-volcanes');
     
     await setDoc(proyectoRef, {
-      nombre: 'Mirador Los Volcanes',
+      nombre: 'Lote Los Volcanes',
       descripcion: 'Proyecto de lotes con vista panorámica',
       fechaCreacion: new Date(),
       totalLotes: Object.keys(lotes).length,

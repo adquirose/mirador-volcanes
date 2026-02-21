@@ -1,4 +1,4 @@
-# 🚀 Inicio Rápido - Mirador Volcanes
+# 🚀 Inicio Rápido - Lote Los Volcanes
 
 ## ✅ El sistema está LISTO y funcionando
 

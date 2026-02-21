@@ -1,4 +1,4 @@
-# Sistema de Administración - Mirador Los Volcanes
+# Sistema de Administración - Lote Los Volcanes
 
 ## Acceso al Sistema
 

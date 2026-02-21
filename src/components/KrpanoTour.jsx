@@ -75,6 +75,7 @@ function KrpanoTour() {
   const [error, setError] = useState(null);
   const [selectedLote, setSelectedLote] = useState(null);
   const [lotes, setLotes] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const muiTheme = useMuiTheme();
 
   // Cargar lotes desde Firestore
@@ -356,7 +357,29 @@ function KrpanoTour() {
   // Renderizar
   return (
     <KrpanoContainer>
-      <Navigation />
+      <Navigation onDrawerChange={setDrawerOpen} />
+      
+      {/* Logo superpuesto en esquina superior derecha - solo visible cuando drawer está cerrado */}
+      <Box
+        component="img"
+        src="/loteo-v5.png"
+        alt="Logo"
+        sx={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          width: 'auto',
+          height: 80,
+          zIndex: 1000,
+          cursor: 'pointer',
+          transition: 'all 0.3s ease-in-out',
+          opacity: drawerOpen ? 0 : 1,
+          visibility: drawerOpen ? 'hidden' : 'visible',
+          '&:hover': {
+            transform: 'scale(1.05)',
+          }
+        }}
+      />
       
       {/* Contenedor del panorama */}
       <KrpanoViewer 

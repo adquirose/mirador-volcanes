@@ -2,14 +2,14 @@
 export const PROJECT_CONFIG = {
   // Información del proyecto
   PROJECT_NAME: 'mirador-volcanes',
-  PROJECT_DISPLAY_NAME: 'Mirador Los Volcanes',
+  PROJECT_DISPLAY_NAME: 'Lote Los Volcanes',
   
   // Configuración de Firebase/Firestore
   FIREBASE_PROJECT_COLLECTION: 'mirador-volcanes',
   
   // Logos y branding
   LOGO_PATH: '/logo-mirador-volcanes.png',
-  LOGO_ALT: 'Mirador Los Volcanes',
+  LOGO_ALT: 'Lote Los Volcanes',
   
   // Configuración de Krpano
   KRPANO_BASE_PATH: '/krpano/',
