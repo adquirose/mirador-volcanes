@@ -405,7 +405,17 @@ const Navigation = ({ onDrawerChange }) => {
   return (
     <>
       {/* Botón flotante a la izquierda */}
-      <Zoom in={true} timeout={1000}>
+      <Zoom 
+        in={!drawerOpen || !isDesktop} // Visible cuando drawer cerrado o en móvil
+        timeout={{
+          appear: 500,
+          enter: 300,
+          exit: 200,
+        }}
+        style={{
+          transitionDelay: drawerOpen ? '0ms' : '200ms',
+        }}
+      >
         <Fab
           ref={fabRef}
           onClick={handleToggleDrawer}
@@ -455,8 +465,10 @@ const Navigation = ({ onDrawerChange }) => {
           disableRestoreFocus: true,
           hideBackdrop: isDesktop,
           BackdropProps: {
+            onClick: !isDesktop ? handleToggleDrawer : undefined, // Clickeable solo en móvil
             sx: {
               backgroundColor: 'rgba(0, 0, 0, 0.2)', // Menos opacidad que el default (0.5)
+              cursor: !isDesktop ? 'pointer' : 'default',
             }
           }
         }}
@@ -480,8 +492,32 @@ const Navigation = ({ onDrawerChange }) => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+              position: 'relative',
             }}
           >
+            {/* Botón de cierre para desktop */}
+            {isDesktop && (
+              <IconButton
+                onClick={handleToggleDrawer}
+                sx={{
+                  position: 'absolute',
+                  right: 12,
+                  top: 12,
+                  width: 32,
+                  height: 32,
+                  color: '#666666',
+                  backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                  border: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
+                  '&:hover': {
+                    backgroundColor: '#f5f5f5',
+                    color: '#333333',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                <CloseIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            )}
             {!logoLoaded && (
               <Skeleton 
                 variant="rectangular" 
