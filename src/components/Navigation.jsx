@@ -157,19 +157,19 @@ const Navigation = ({ onDrawerChange }) => {
   const content = {
     proyecto: {
       title: 'PROYECTO',
-      text: 'Ubicado en uno de los sectores más atractivos de Panguipulli, Lote Los Volcanes es un loteo exclusivo de sólo 10 sitios de ~5.000 m², con vistas privilegiadas a los volcanes Villarrica y Choshuenco. La primera línea de sitios se integra a bosque nativo y borde de lago, mientras que la segunda línea se encuentra en una pradera de suave pendiente con inigualables vistas panorámicas. El entorno es ideal para quienes buscan un espacio de tranquilidad y privacidad junto al lago, a sólo 10 minutos del pueblo. El loteo contempla urbanización soterrada y un amplio sector de playa común con 80 mt de frente de lago, muelle, bajada pavimentada, bajada de lancha, estacionamientos y bodegas para equipos náuticos. Lote Los Volcanes ofrece una excelente conectividad por camino Etchegaray, ruta de muy bajo tránsito, con acceso por camino privado y portón exclusivo que refuerzan un entorno seguro, silencioso y verdaderamente único para vivir o descansar junto al lago.'
+      text: 'Ubicado en uno de los sectores más atractivos de Panguipulli, Loteo Los Volcanes es un loteo exclusivo de sólo 10 sitios de ~5.000 m², con vistas privilegiadas a los volcanes Villarrica y Choshuenco. La primera línea de sitios se integra a bosque nativo y borde de lago, mientras que la segunda línea se encuentra en una pradera de suave pendiente con inigualables vistas panorámicas. El entorno es ideal para quienes buscan un espacio de tranquilidad y privacidad junto al lago, a sólo 10 minutos del pueblo. El loteo contempla urbanización soterrada y un amplio sector de playa común con 80 mt de frente de lago, muelle, bajada pavimentada, bajada de lancha, estacionamientos y bodegas para equipos náuticos. Loteo Los Volcanes ofrece una excelente conectividad por camino Etchegaray, ruta de muy bajo tránsito, con acceso por camino privado y portón exclusivo que refuerzan un entorno seguro, silencioso y verdaderamente único para vivir o descansar junto al lago.'
     },
     galeria: {
       title: 'GALERÍA',
-      text: 'Galería de imágenes del proyecto Lote Los Volcanes. Aquí podrás ver fotografías de los sitios, las vistas panorámicas, el entorno natural y las instalaciones comunes del loteo.'
+      text: 'Galería de imágenes del proyecto Loteo Los Volcanes. Aquí podrás ver fotografías de los sitios, las vistas panorámicas, el entorno natural y las instalaciones comunes del loteo.'
     },
     ubicacion: {
       title: 'UBICACIÓN',
-      text: 'Lote Los Volcanes se encuentra estratégicamente ubicado en Panguipulli, Región de Los Ríos, Chile. Con fácil acceso por camino Etchegaray y a solo 10 minutos del centro del pueblo, ofrece la perfecta combinación entre tranquilidad y conectividad.'
+      text: 'Loteo Los Volcanes se encuentra estratégicamente ubicado en Panguipulli, Región de Los Ríos, Chile. Con fácil acceso por camino Etchegaray y a solo 10 minutos del centro del pueblo, ofrece la perfecta combinación entre tranquilidad y conectividad.'
     },
     contacto: {
       title: 'CONTACTO',
-      text: 'Para más información sobre Lote Los Volcanes, no dudes en contactarnos. Nuestro equipo está disponible para resolver todas tus consultas sobre este exclusivo proyecto inmobiliario.'
+      text: 'Para más información sobre Loteo Los Volcanes, no dudes en contactarnos. Nuestro equipo está disponible para resolver todas tus consultas sobre este exclusivo proyecto inmobiliario.'
     }
   };
 
@@ -187,7 +187,7 @@ const Navigation = ({ onDrawerChange }) => {
     }
     
     if (itemId === 'whatsapp') {
-      const message = encodeURIComponent('Hola, me interesa conocer más sobre Lote Los Volcanes');
+      const message = encodeURIComponent('Hola, me interesa conocer más sobre Loteo Los Volcanes');
       const whatsappUrl = `https://wa.me/56982521849?text=${message}`;
       window.open(whatsappUrl, '_blank');
       setDrawerOpen(false);
@@ -361,10 +361,10 @@ const Navigation = ({ onDrawerChange }) => {
 
   // Efecto para quitar foco del FAB cuando se abre modal
   useEffect(() => {
-    if ((modalOpen || galleryModalOpen || contactModalOpen) && fabRef.current) {
+    if ((modalOpen || galleryModalOpen || contactModalOpen || drawerOpen) && fabRef.current) {
       fabRef.current.blur();
     }
-  }, [modalOpen, galleryModalOpen, contactModalOpen]);
+  }, [modalOpen, galleryModalOpen, contactModalOpen, drawerOpen]);
 
   // Efecto para navegación por teclado en la galería
   useEffect(() => {
@@ -434,69 +434,63 @@ const Navigation = ({ onDrawerChange }) => {
               transform: 'scale(1.05)',
             },
             transition: 'all 0.3s ease',
-            width: 56,
-            height: 56,
+            width: { xs: 44, md: 50 },
+            height: { xs: 44, md: 50 },
           }}
         >
           {drawerOpen ? <CloseIcon /> : <MenuIcon />}
         </Fab>
       </Zoom>
 
-      {/* Drawer lateral desde la izquierda */}
-      <Drawer
-        anchor="left"
+      {/* Modal flotante en lugar de drawer */}
+      <Modal
         open={drawerOpen}
         onClose={handleToggleDrawer}
-        keepMounted={false}
-        variant={isDesktop ? "persistent" : "temporary"}
+        closeAfterTransition
+        disableEnforceFocus={true}
+        disableAutoFocus={true}
+        disableRestoreFocus={true}
+        hideBackdrop={false}
         sx={{
-          '& .MuiDrawer-paper': {
-            width: 320,
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(20px)',
-            border: 'none',
-            borderRight: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
-            boxShadow: `8px 0 32px ${alpha(theme.palette.common.black, 0.2)}`,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          pl: 2.5,
+          pt: 3,
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
           },
         }}
-        ModalProps={{
-          disableEnforceFocus: true,
-          disableAutoFocus: true,
-          disableRestoreFocus: true,
-          hideBackdrop: isDesktop,
-          BackdropProps: {
-            onClick: !isDesktop ? handleToggleDrawer : undefined, // Clickeable solo en móvil
-            sx: {
-              backgroundColor: 'rgba(0, 0, 0, 0.2)', // Menos opacidad que el default (0.5)
-              cursor: !isDesktop ? 'pointer' : 'default',
-            }
-          }
-        }}
-        SlideProps={{
-          direction: 'right',
-        }}
       >
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          {/* Header del drawer */}
-          <Box
+        <Slide direction="right" in={drawerOpen} mountOnEnter unmountOnExit>
+          <Paper
+            elevation={16}
             sx={{
-              p: 3,
-              borderBottom: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              width: { xs: 280, md: 320 },
+              maxHeight: { xs: '60vh', md: '70vh' },
+              minHeight: { xs: '320px', md: '400px' },
+              backgroundColor: 'rgba(255, 255, 255, 0.5)',
+              border: 'none',
+              borderRadius: 3,
+              boxShadow: `8px 0 32px ${alpha(theme.palette.common.black, 0.2)}`,
               display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              position: 'relative',
+              flexDirection: 'column',
+              overflow: 'hidden',
             }}
           >
-            {/* Botón de cierre para desktop */}
-            {isDesktop && (
+            {/* Header del modal */}
+            <Box
+              sx={{
+                p: { xs: 2, md: 3 },
+                borderBottom: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
+                backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+              }}
+            >
+              {/* Botón de cierre */}
               <IconButton
                 onClick={handleToggleDrawer}
                 sx={{
@@ -517,101 +511,103 @@ const Navigation = ({ onDrawerChange }) => {
               >
                 <CloseIcon sx={{ fontSize: 18 }} />
               </IconButton>
-            )}
-            {!logoLoaded && (
-              <Skeleton 
-                variant="rectangular" 
-                width={224} 
-                height={96}
-                sx={{
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  borderRadius: 1
-                }}
-              />
-            )}
-            <img
-              src="/loteo-v4.png"
-              alt="Logo Rivera"
-              style={{
-                maxWidth: '224px',
-                maxHeight: '96px',
-                width: '100%',
-                objectFit: 'contain',
-                display: logoLoaded ? 'block' : 'none'
-              }}
-              onLoad={() => setLogoLoaded(true)}
-              onError={() => setLogoLoaded(false)}
-            />
-          </Box>
-
-          {/* Lista de navegación */}
-          <List sx={{ flexGrow: 1, py: 2 }}>
-            {navItems.map((item, index) => (
-              <ListItem key={item.id} disablePadding>
-                <ListItemButton
-                  onClick={() => handleNavClick(item.id)}
+              {!logoLoaded && (
+                <Skeleton 
+                  variant="rectangular" 
+                  width={180} 
+                  height={72}
                   sx={{
-                    py: 2.5,
-                    px: 3,
-                    mx: 2,
-                    mb: 1,
-                    borderRadius: 2,
-                    transition: 'all 0.3s ease',
-                    border: `1px solid transparent`,
-                    '&:hover': {
-                      backgroundColor: alpha(theme.palette.common.black, 0.05),
-                      transform: 'translateX(8px)',
-                      border: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
-                    },
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: 1
                   }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      color: '#555555',
-                      minWidth: '40px',
-                      '& .MuiSvgIcon-root': {
-                        fontSize: '1.4rem',
-                      },
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={item.label}
-                    primaryTypographyProps={{
-                      fontWeight: 600,
-                      fontSize: '1.1rem',
-                      color: '#333333',
-                      letterSpacing: '0.5px',
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+                />
+              )}
+              <img
+                src="/loteo-v4.png"
+                alt="Logo Rivera"
+                style={{
+                  maxWidth: '180px',
+                  maxHeight: '72px',
+                  width: '100%',
+                  objectFit: 'contain',
+                  display: logoLoaded ? 'block' : 'none'
+                }}
+                onLoad={() => setLogoLoaded(true)}
+                onError={() => setLogoLoaded(false)}
+              />
+            </Box>
 
-          {/* Footer del drawer */}
-          <Box
-            sx={{
-              p: 3,
-              borderTop: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
-              backgroundColor: 'rgba(255, 255, 255, 0.6)',
-            }}
-          >
-            <Typography
-              variant="caption"
+            {/* Lista de navegación */}
+            <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+              <List sx={{ py: { xs: 1, md: 2 } }}>
+                {navItems.map((item, index) => (
+                  <ListItem key={item.id} disablePadding>
+                    <ListItemButton
+                      onClick={() => handleNavClick(item.id)}
+                      sx={{
+                        py: { xs: 0.8, md: 1.5 },
+                        px: { xs: 2, md: 3 },
+                        mx: { xs: 1, md: 2 },
+                        mb: 0.2,
+                        borderRadius: 2,
+                        transition: 'all 0.3s ease',
+                        border: `1px solid transparent`,
+                        '&:hover': {
+                          backgroundColor: alpha(theme.palette.common.black, 0.05),
+                          transform: 'translateX(8px)',
+                          border: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
+                        },
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          color: '#555555',
+                          minWidth: { xs: '32px', md: '40px' },
+                          '& .MuiSvgIcon-root': {
+                            fontSize: { xs: '1.2rem', md: '1.4rem' },
+                          },
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.label}
+                        primaryTypographyProps={{
+                          fontWeight: 600,
+                          fontSize: { xs: '0.95rem', md: '1.1rem' },
+                          color: '#333333',
+                          letterSpacing: '0.5px',
+                        }}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+
+            {/* Footer del modal */}
+            <Box
               sx={{
-                color: '#666666',
-                textAlign: 'center',
-                display: 'block',
-                fontSize: '0.8rem',
+                p: { xs: 2, md: 3 },
+                borderTop: `1px solid ${alpha(theme.palette.common.black, 0.1)}`,
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
               }}
             >
-              Tour Virtual 360°
-            </Typography>
-          </Box>
-        </Box>
-      </Drawer>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: '#666666',
+                  textAlign: 'center',
+                  display: 'block',
+                  fontSize: { xs: '0.7rem', md: '0.8rem' },
+                }}
+              >
+                Tour Virtual 360°
+              </Typography>
+            </Box>
+          </Paper>
+        </Slide>
+      </Modal>
 
       {/* Modal para mostrar contenido */}
       <Modal
@@ -1032,7 +1028,7 @@ const Navigation = ({ onDrawerChange }) => {
                   fontSize: { xs: '0.9rem', sm: '1rem' },
                 }}
               >
-                Nos interesa conocer tu opinión sobre Lote Los Volcanes. 
+                Nos interesa conocer tu opinión sobre Loteo Los Volcanes. 
                 Completa el formulario y nos contactaremos contigo.
               </Typography>
 

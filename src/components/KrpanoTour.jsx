@@ -359,7 +359,7 @@ function KrpanoTour() {
     <KrpanoContainer>
       <Navigation onDrawerChange={setDrawerOpen} />
       
-      {/* Logo superpuesto en esquina superior derecha - solo visible cuando drawer está cerrado */}
+      {/* Logo centrado en la parte superior - visible tanto en móvil como desktop */}
       <Box
         component="img"
         src="/loteo-v5.png"
@@ -367,16 +367,17 @@ function KrpanoTour() {
         sx={{
           position: 'absolute',
           top: 20,
-          right: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
           width: 'auto',
-          height: 80,
+          height: { xs: 80, md: 100 },
           zIndex: 1000,
           cursor: 'pointer',
           transition: 'all 0.3s ease-in-out',
           opacity: drawerOpen ? 0 : 1,
           visibility: drawerOpen ? 'hidden' : 'visible',
           '&:hover': {
-            transform: 'scale(1.05)',
+            transform: 'translateX(-50%) scale(1.05)',
           }
         }}
       />
