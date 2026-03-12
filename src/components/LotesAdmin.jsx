@@ -211,10 +211,17 @@ function LotesAdmin() {
   }
 
   return (
-    <Box>
+    <Box sx={{ width: '100%' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            fontWeight: 700,
+            color: '#1a1a1a',
+            fontSize: { xs: '1.8rem', md: '2.125rem' }
+          }}
+        >
           Gestión de Lotes
         </Typography>
         <Button
@@ -222,7 +229,12 @@ function LotesAdmin() {
           size="small"
           onClick={loadLotes}
           disabled={loading}
-          sx={{ minWidth: 'auto', p: 1 }}
+          sx={{ 
+            minWidth: 'auto', 
+            p: 1,
+            backgroundColor: '#1976d2',
+            '&:hover': { backgroundColor: '#1565c0' }
+          }}
         >
           <Refresh />
         </Button>
@@ -240,14 +252,7 @@ function LotesAdmin() {
       )}
 
       {/* Búsqueda */}
-      <Paper 
-        sx={{ 
-          p: 2, 
-          mb: 2,
-          backgroundColor: 'background.paper',
-          color: 'text.primary'
-        }}
-      >
+      <Paper sx={{ p: 2, mb: 2 }}>
         <TextField
           fullWidth
           label="Buscar lotes..."
@@ -572,42 +577,57 @@ function LotesAdmin() {
       </Backdrop>
 
       {/* Resumen */}
-      <Paper sx={{ mt: 3, p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Resumen
+      <Paper sx={{ mt: 3, p: 3, mb: 2 }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            mb: 3, 
+            fontWeight: 600,
+            color: '#1a1a1a'
+          }}
+        >
+          Resumen de Lotes
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 6, sm: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Total de lotes
-            </Typography>
-            <Typography variant="h6">
-              {lotes.length}
-            </Typography>
+            <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+              <Typography variant="body1" sx={{ color: '#666666', mb: 1 }}>
+                Total de lotes
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#1a1a1a' }}>
+                {lotes.length}
+              </Typography>
+            </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Disponibles
-            </Typography>
-            <Typography variant="h6" color="success.main">
-              {lotes.filter(l => l.estado === 'disponible').length}
-            </Typography>
+            <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#e8f5e8', borderRadius: '8px' }}>
+              <Typography variant="body1" sx={{ color: '#2e7d32', mb: 1 }}>
+                Disponibles
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#2e7d32' }}>
+                {lotes.filter(l => l.estado === 'disponible').length}
+              </Typography>
+            </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Reservados
-            </Typography>
-            <Typography variant="h6" color="warning.main">
-              {lotes.filter(l => l.estado === 'reservado').length}
-            </Typography>
+            <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#fff3e0', borderRadius: '8px' }}>
+              <Typography variant="body1" sx={{ color: '#f57c00', mb: 1 }}>
+                Reservados
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#f57c00' }}>
+                {lotes.filter(l => l.estado === 'reservado').length}
+              </Typography>
+            </Box>
           </Grid>
           <Grid size={{ xs: 6, sm: 3 }}>
-            <Typography variant="body2" color="text.secondary">
-              Vendidos
-            </Typography>
-            <Typography variant="h6" color="error.main">
-              {lotes.filter(l => l.estado === 'vendido').length}
-            </Typography>
+            <Box sx={{ textAlign: 'center', p: 2, backgroundColor: '#ffebee', borderRadius: '8px' }}>
+              <Typography variant="body1" sx={{ color: '#d32f2f', mb: 1 }}>
+                Vendidos
+              </Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#d32f2f' }}>
+                {lotes.filter(l => l.estado === 'vendido').length}
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
       </Paper>

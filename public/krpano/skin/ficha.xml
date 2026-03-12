@@ -59,7 +59,7 @@
 			set(layer[btn-ws].visible,false);
 			,
 			set(layer[btn-ws].visible,true);
-			set(layer[btn-ws].onclick,openurl(get(link_ws)));
+			set(layer[btn-ws].onclick,js('window.trackKrpanoWhatsApp && window.trackKrpanoWhatsApp("' +get(lote)+ '")'); openurl(get(link_ws)));
 		);		
 	</action>
 

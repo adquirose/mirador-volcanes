@@ -37,6 +37,8 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useAuth } from '../hooks/useAuth';
 import MapboxMap from './MapboxMap';
+import { trackWhatsAppClick, trackContactFormSubmit, trackConversion } from '../utils/gtm';
+import { submitContactForm } from '../services/contactService';
 
 const Navigation = ({ onDrawerChange }) => {
   const theme = useTheme();
@@ -59,6 +61,9 @@ const Navigation = ({ onDrawerChange }) => {
     email: '',
     asunto: ''
   });
+
+  // Estado para el envío del formulario
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estado para errores de validación
   const [formErrors, setFormErrors] = useState({
@@ -187,6 +192,9 @@ const Navigation = ({ onDrawerChange }) => {
     }
     
     if (itemId === 'whatsapp') {
+      // Trackear evento GTM
+      trackWhatsAppClick('navigation');
+      
       const message = encodeURIComponent('Hola, me interesa conocer más sobre Loteo Los Volcanes');
       const whatsappUrl = `https://wa.me/56982521849?text=${message}`;
       window.open(whatsappUrl, '_blank');
@@ -316,8 +324,10 @@ const Navigation = ({ onDrawerChange }) => {
     return verifier ? formatted + '-' + verifier : formatted;
   };
 
-  const handleSubmitContact = (event) => {
+  const handleSubmitContact = async (event) => {
     event.preventDefault();
+    
+    if (isSubmitting) return; // Prevenir envíos múltiples
     
     // Validar todos los campos
     const errors = {};
@@ -342,9 +352,38 @@ const Navigation = ({ onDrawerChange }) => {
       return;
     }
     
-    console.log('Formulario de contacto enviado:', contactForm);
-    alert('¡Gracias por tu mensaje! Nos contactaremos contigo pronto.');
-    handleCloseContact();
+    // Iniciar envío
+    setIsSubmitting(true);
+    
+    try {
+      // Guardar en Firestore
+      const result = await submitContactForm(contactForm);
+      
+      if (result.success) {
+        console.log('Formulario de contacto enviado exitosamente:', result.id);
+        
+        // Trackear evento GTM
+        trackContactFormSubmit({...contactForm, id: result.id});
+        trackConversion('contact_form_lead', {
+          value: 1,
+          lead_source: 'contact_form',
+          transaction_id: result.id
+        });
+        
+        alert('¡Gracias por tu mensaje! Hemos recibido tu consulta y nos contactaremos contigo pronto.');
+        handleCloseContact();
+        
+      } else {
+        console.error('Error al enviar formulario:', result.error);
+        alert('Hubo un problema al enviar tu mensaje. Por favor intenta nuevamente o contacta por WhatsApp.');
+      }
+      
+    } catch (error) {
+      console.error('Error inesperado:', error);
+      alert('Hubo un problema técnico. Por favor intenta nuevamente o contacta por WhatsApp.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePrevImage = () => {
@@ -1312,22 +1351,27 @@ const Navigation = ({ onDrawerChange }) => {
                     <Button
                       type="submit"
                       variant="contained"
+                      disabled={isSubmitting}
                       sx={{
                         borderRadius: '12px',
-                        backgroundColor: '#333333',
+                        backgroundColor: isSubmitting ? '#999999' : '#333333',
                         color: 'white',
                         px: 4,
                         py: 1.5,
                         fontWeight: 600,
                         fontSize: { xs: '0.85rem', sm: '0.9rem' },
                         '&:hover': {
-                          backgroundColor: '#555555',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+                          backgroundColor: isSubmitting ? '#999999' : '#555555',
+                          transform: isSubmitting ? 'none' : 'translateY(-2px)',
+                          boxShadow: isSubmitting ? 'none' : '0 6px 16px rgba(0, 0, 0, 0.2)',
+                        },
+                        '&:disabled': {
+                          backgroundColor: '#999999',
+                          color: '#ffffff',
                         },
                       }}
                     >
-                      Enviar Consulta
+                      {isSubmitting ? 'Enviando...' : 'Enviar Consulta'}
                     </Button>
                   </Box>
                 </Grid>

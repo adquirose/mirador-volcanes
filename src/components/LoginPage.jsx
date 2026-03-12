@@ -52,12 +52,11 @@ function LoginPage() {
             }}
           >
             <img 
-              src="/logorivera.png" 
+              src="/loteo-v5.png" 
               alt="Logo Rivera" 
               style={{ 
                 height: '120px',
-                marginBottom: '16px',
-                filter: 'brightness(0) invert(1)'
+                marginBottom: '16px'
               }} 
             />
             <Typography variant="h6" color="textSecondary">
