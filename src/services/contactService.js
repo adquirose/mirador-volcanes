@@ -20,8 +20,8 @@ export const submitContactForm = async (formData) => {
       ip: null // Se puede agregar después
     };
 
-    // Guardar en colección 'contactos'
-    const docRef = await addDoc(collection(db, 'contactos'), contactData);
+    // Guardar dentro del proyecto, al mismo nivel que lotes
+    const docRef = await addDoc(collection(db, 'proyectos/mirador-volcanes/contactos'), contactData);
     
     console.log('Formulario guardado en Firestore con ID:', docRef.id);
     return { success: true, id: docRef.id };

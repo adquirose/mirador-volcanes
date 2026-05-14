@@ -3,12 +3,12 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD8nCm_5axBN1KJR58HRzhIUlIzuI5zpzs",
-  authDomain: "lanube360-29882.firebaseapp.com",
-  projectId: "lanube360-29882",
-  storageBucket: "lanube360-29882.firebasestorage.app",
-  messagingSenderId: "910468433599",
-  appId: "1:910468433599:web:4dee048a0a5cdb8f1d1701"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Inicializar Firebase

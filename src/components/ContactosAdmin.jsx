@@ -42,7 +42,7 @@ const ContactosAdmin = () => {
   // Cargar contactos en tiempo real
   useEffect(() => {
     const q = query(
-      collection(db, 'contactos'),
+      collection(db, 'proyectos/mirador-volcanes/contactos'),
       orderBy('fechaEnvio', 'desc')
     );
 
@@ -67,7 +67,7 @@ const ContactosAdmin = () => {
   // Marcar como procesado
   const marcarComoProcesado = async (contactoId) => {
     try {
-      await updateDoc(doc(db, 'contactos', contactoId), {
+      await updateDoc(doc(db, 'proyectos/mirador-volcanes/contactos', contactoId), {
         procesado: true,
         fechaProcesado: new Date()
       });
@@ -273,7 +273,7 @@ const ContactosAdmin = () => {
             </DialogTitle>
             <DialogContent>
               <Grid container spacing={3} sx={{ mt: 1 }}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Nombre"
                     value={selectedContacto.nombre}
@@ -281,7 +281,7 @@ const ContactosAdmin = () => {
                     InputProps={{ readOnly: true }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Email"
                     value={selectedContacto.email}
@@ -289,7 +289,7 @@ const ContactosAdmin = () => {
                     InputProps={{ readOnly: true }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Teléfono"
                     value={selectedContacto.telefono}
@@ -297,7 +297,7 @@ const ContactosAdmin = () => {
                     InputProps={{ readOnly: true }}
                   />
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                   <TextField
                     label="Fecha de Envío"
                     value={formatearFecha(selectedContacto.fechaEnvio)}
@@ -305,7 +305,7 @@ const ContactosAdmin = () => {
                     InputProps={{ readOnly: true }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <TextField
                     label="Asunto"
                     value={selectedContacto.asunto}
@@ -315,7 +315,7 @@ const ContactosAdmin = () => {
                     InputProps={{ readOnly: true }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Chip
                     icon={selectedContacto.procesado ? <CheckIcon /> : <TimeIcon />}
                     label={selectedContacto.procesado ? 'Procesado' : 'Pendiente'}

@@ -30,12 +30,18 @@ export const AuthProvider = ({ children }) => {
     try {
       setError('')
       setLoading(true)
+
+      // Normalizar entrada para evitar errores por espacios o mayúsculas
+      const normalizedEmail = String(email || '').trim().toLowerCase()
+      const normalizedPassword = String(password || '').trim()
       
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 500))
       
       // Buscar usuario en la lista de desarrollo
-      const foundUser = DEV_USERS.find(u => u.email === email && u.password === password)
+      const foundUser = DEV_USERS.find(
+        u => u.email.toLowerCase() === normalizedEmail && u.password === normalizedPassword
+      )
       
       if (foundUser) {
         const userSession = {
